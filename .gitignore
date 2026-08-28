@@ -1,0 +1,18 @@
+dist
+vendor
+.bin
+openshuttercounter
+!cmd/openshuttercounter
+helpers
+coverage.out
+
+# capture and snapshot artefacts from a research session
+*.pcap
+!research/captures/*.pcap
+*.pcapng
+!research/captures/*.pcapng
+snap_*.json
+
+# the bundle this repository was built from, kept locally for reference
+handoff/
+canon-shutter-handoff.tar.gz

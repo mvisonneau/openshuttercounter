@@ -1,0 +1,69 @@
+version: "2"
+
+linters:
+  default: all
+  disable:
+    - depguard
+    - err113
+    - exhaustruct
+    - exhaustruct_v5
+    - forbidigo
+    - forcetypeassert
+    - gochecknoglobals
+    - godox
+    - ireturn
+    - mnd
+    - nakedret
+    - noinlineerr
+    - nolintlint
+    - nonamedreturns
+    - paralleltest
+    - revive
+    - testpackage
+    - varnamelen
+    - wrapcheck
+    - wsl
+    - wsl_v5
+
+  settings:
+    cyclop:
+      max-complexity: 20
+    funlen:
+      lines: -1
+      statements: 60
+    lll:
+      line-length: 130
+    tagliatelle:
+      case:
+        rules:
+          json: snake
+
+  exclusions:
+    rules:
+      # Every USB backend has to reach into C structures (usbfs ioctls,
+      # SetupAPI detail buffers, libusb's device list) and read the device
+      # nodes and sysfs attributes it just enumerated. That is the job.
+      - path: pkg/usb/
+        linters:
+          - gosec
+        text: 'G103|G304'
+      # The capture decoder reads the file the user names on the command
+      # line. Reading it is the entire purpose of the command.
+      - path: pkg/pcap/
+        linters:
+          - gosec
+        text: 'G304'
+
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/mvisonneau)

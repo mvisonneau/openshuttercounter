@@ -1,0 +1,105 @@
+version: 2
+
+before:
+  hooks:
+    - make autocomplete-scripts
+
+builds:
+  - main: ./cmd/openshuttercounter
+    env:
+      # Every USB backend is pure Go: usbfs on Linux, the still image device
+      # interface on Windows, and libusb loaded at runtime through purego on
+      # macOS. Nothing here needs cgo, so everything cross compiles.
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - '386'
+      - amd64
+      - arm
+      - arm64
+    goarm: [6, 7]
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X github.com/mvisonneau/openshuttercounter/internal/app.Version={{.Version}}
+    ignore:
+      - { goos: darwin, goarch: '386' }
+      - { goos: darwin, goarch: arm }
+      - { goos: windows, goarch: arm }
+
+universal_binaries:
+  - {}
+
+archives:
+  - name_template: '{{ .ProjectName }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    format_overrides:
+      - goos: windows
+        formats: ['zip']
+    files:
+      - README.md
+      - LICENSE
+      - docs/*
+      - helpers/*
+
+nfpms:
+  - maintainer: &author Maxime VISONNEAU <maxime.visonneau@gmail.com>
+    description: &description Read the shutter actuation count of a Canon EOS camera
+    license: &license MIT
+    homepage: &homepage https://github.com/mvisonneau/openshuttercounter
+    vendor: *author
+    file_name_template: '{{ .ProjectName }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    bindir: /usr/local/bin
+    formats:
+      - apk
+      - deb
+      - rpm
+    contents:
+      - src: ./helpers/autocomplete/bash
+        dst: /usr/share/bash-completion/completions/{{ .ProjectName }}
+        file_info:
+          mode: 0644
+      - src: ./helpers/autocomplete/zsh
+        dst: /usr/share/zsh/vendor-completions/_{{ .ProjectName }}
+        file_info:
+          mode: 0644
+      - src: ./helpers/udev/99-canon-ptp.rules
+        dst: /usr/lib/udev/rules.d/99-canon-ptp.rules
+        file_info:
+          mode: 0644
+      - src: ./LICENSE
+        dst: /usr/share/doc/{{ .ProjectName }}/copyright
+        file_info:
+          mode: 0644
+
+homebrew_casks:
+  - description: *description
+    homepage: *homepage
+    license: *license
+    repository:
+      owner: mvisonneau
+      name: homebrew-tap
+    # macOS reaches USB through libusb, loaded at runtime.
+    dependencies:
+      - formula: libusb
+    completions:
+      bash: helpers/autocomplete/bash
+      zsh: helpers/autocomplete/zsh
+      fish: helpers/autocomplete/fish
+
+scoops:
+  - description: *description
+    homepage: *homepage
+    license: *license
+    repository:
+      owner: mvisonneau
+      name: scoops
+
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Tag }}_sha512sums.txt'
+  algorithm: sha512
+
+changelog:
+  disable: true

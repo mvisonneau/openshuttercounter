@@ -1,0 +1,60 @@
+---
+name: test
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Install Go
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
+        with:
+          # Follow go.mod rather than a pinned version: the tool
+          # dependencies raise the required toolchain from time to time, and
+          # setup-go pins GOTOOLCHAIN=local, so a hardcoded version here
+          # silently stops matching.
+          go-version-file: go.mod
+
+      # Only one platform's USB backend compiles on any given runner, so the
+      # linter is pointed at each of them in turn rather than just the host's.
+      - name: Lint
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: make lint-all
+
+      - name: Test
+        run: make test
+
+      - name: Publish coverage to coveralls.io
+        uses: shogo82148/actions-goveralls@25f5320d970fb565100cf1993ada29be1bb196a1 # v1
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        with:
+          path-to-profile: coverage.out
+
+      # Every USB backend has to keep compiling, including the ones this
+      # runner cannot exercise.
+      - name: Cross compile all targets
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: make build-all
+
+      - name: Build
+        run: go build ./cmd/openshuttercounter
