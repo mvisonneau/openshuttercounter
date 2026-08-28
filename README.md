@@ -19,6 +19,17 @@ One static binary. No libgphoto2, no vendor SDK, no Windows-only tooling.
 
 ## Why this exists
 
+I wanted the shutter count on my own 5D Mark IV. It ought to be a solved
+problem — the camera knows the number, the cable is right there — but every
+open source tool I tried came back empty, and the ones that worked were paid,
+closed and Windows only. For a number the camera will happily tell you, that
+seemed a poor state of affairs, so I went looking for why.
+
+It turns out the free tools are not at fault. Canon moved the counter, and
+nobody had published the way to the new place. So I worked it out and wrote it
+down, which is really what this repository is: the answer, in enough detail
+that the next person does not have to go looking.
+
 Up to roughly the DIGIC 5 generation, Canon exposed a shutter counter as PTP
 device property `0xD1AC`. `gphoto2` reads it as `/main/status/shuttercounter`
 and it still works on a 5D Mark III.
@@ -26,15 +37,14 @@ and it still works on a 5D Mark III.
 On DIGIC 6 and newer bodies — 5D Mark IV, 5DS, 5DS R, 1D X Mark II, 80D and
 everything after — that property is gone. `GetDevicePropValue` on `0xD1AC`
 returns `OperationNotSupported`. This is why gphoto2, FreeShutterCounter, EOS
-Digital Info and every other free tool comes up empty on a modern body, and why
-the remaining options are paid and closed.
+Digital Info and every other free tool comes up empty on a modern body: not an
+oversight on their part, but a wall Canon put there.
 
 The counters were never in the PTP property tree. **They live in the memory of
 the MPU**, the separate microcontroller that drives the shutter and mirror, and
 they are reachable through a text command channel Canon carries over two vendor
 PTP opcodes. That channel, its framing and the MPU address map are documented
-in full in [docs/PROTOCOL.md](docs/PROTOCOL.md) — the documentation is the point
-of this project at least as much as the binary is.
+in full in [docs/PROTOCOL.md](docs/PROTOCOL.md).
 
 ## Status
 
