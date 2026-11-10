@@ -44,6 +44,11 @@ type Model struct {
 	// ConfirmedOn describes the firmware it was confirmed against.
 	ConfirmedOn string `json:"confirmed_on,omitempty"`
 
+	// Tried records that the body has been read by somebody holding it,
+	// and the value checked some other way, without the frame count
+	// confirmation. An untried entry is inferred from documentation alone.
+	Tried bool `json:"tried,omitempty"`
+
 	// RatedLife is the manufacturer's shutter durability rating, used only
 	// to put a reading in context. Zero means unknown.
 	RatedLife uint32 `json:"rated_life,omitempty"`

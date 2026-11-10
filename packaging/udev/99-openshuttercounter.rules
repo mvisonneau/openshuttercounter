@@ -1,0 +1,10 @@
+# Lets the logged in user open cameras openshuttercounter reads, without root.
+#
+# Only the still image (PTP) interface class 06/01/01 is matched, so other
+# devices from the same vendors, such as a Sony game controller, are left alone.
+
+# Canon
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="04a9", ENV{ID_USB_INTERFACES}=="*:060101:*", MODE="0660", TAG+="uaccess"
+
+# Sony
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="054c", ENV{ID_USB_INTERFACES}=="*:060101:*", MODE="0660", TAG+="uaccess"
