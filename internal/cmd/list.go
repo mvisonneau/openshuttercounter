@@ -109,7 +109,11 @@ func Models(ctx context.Context, cmd *cli.Command) error {
 		fmt.Printf("\n%s  (USB vendor %s)\n\n", m.Manufacturer, m.VendorID)
 
 		for _, model := range m.Models {
-			status := "not confirmed by anyone yet"
+			status := "untried"
+			if model.Tried {
+				status = "read on a camera, not yet confirmed"
+			}
+
 			if model.Confirmed {
 				status = "confirmed"
 				if model.ConfirmedOn != "" {
@@ -117,7 +121,12 @@ func Models(ctx context.Context, cmd *cli.Command) error {
 				}
 			}
 
-			fmt.Printf("  %-20s USB %s:%04x  (%s)\n", model.Name, m.VendorID, model.ProductID, status)
+			usbID := fmt.Sprintf("USB %s:%04x", m.VendorID, model.ProductID)
+			if model.ProductID == 0 {
+				usbID = fmt.Sprintf("USB %s:????", m.VendorID)
+			}
+
+			fmt.Printf("  %-28s %s  (%s)\n", model.Name, usbID, status)
 
 			for _, c := range model.Counters {
 				fmt.Printf("      %-24s %s\n", c.Location, c.Label)
@@ -131,11 +140,12 @@ func Models(ctx context.Context, cmd *cli.Command) error {
 }
 
 const modelsFooter = `
-  Older bodies need no entry here: they still answer the standard PTP shutter
-  counter property, which is tried first on every camera.
+  Older Canon bodies need no entry here: they still answer the standard PTP
+  shutter counter property, which is tried first on every Canon camera.
 
-  A camera missing from this list may well work anyway. Run it, and whether it
-  worked or not, a trace makes the answer useful to everyone else:
+  A Canon camera missing from this list may well work anyway. A Sony one is
+  refused, because each Sony generation keeps its count somewhere else. Either
+  way, run it: a trace makes the answer useful to everyone else:
 
     openshuttercounter --trace mycamera.json
 

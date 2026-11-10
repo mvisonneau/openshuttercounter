@@ -51,6 +51,7 @@ const (
 	RCDevicePropNotSupported  uint16 = 0x200a
 	RCInvalidObjectFormatCode uint16 = 0x200b
 	RCStoreFull               uint16 = 0x200c
+	RCStoreNotAvailable       uint16 = 0x2013
 	RCAccessDenied            uint16 = 0x200f
 	RCInvalidParentObject     uint16 = 0x2018
 	RCDeviceBusy              uint16 = 0x2019
@@ -73,6 +74,7 @@ var responseNames = map[uint16]string{
 	RCDevicePropNotSupported:  "DevicePropNotSupported",
 	RCInvalidObjectFormatCode: "InvalidObjectFormatCode",
 	RCStoreFull:               "StoreFull",
+	RCStoreNotAvailable:       "StoreNotAvailable",
 	RCAccessDenied:            "AccessDenied",
 	RCInvalidParentObject:     "InvalidParentObject",
 	RCDeviceBusy:              "DeviceBusy",

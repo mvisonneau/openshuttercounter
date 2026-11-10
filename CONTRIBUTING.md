@@ -53,6 +53,11 @@ openshuttercounter decode before.json --only 9052,9053
 openshuttercounter decode after.json  --only 9052,9053
 ```
 
+On a Sony body there is no channel to filter: compare the two readings
+directly, and take the frames with the shutter you normally use. Whether the
+electronic shutter advances the count is still an open question, so a second
+run with it is welcome too.
+
 If every counter advanced by exactly the number of frames you took, that is a
 confirmed camera. Open a pull request adding it to the model list for its
 manufacturer — for Canon that is
@@ -81,7 +86,7 @@ only thing that identifies a counter.
 
 ## Adding a manufacturer
 
-Only Canon is implemented so far. The rest of the project is deliberately
+Canon and Sony are implemented so far. The rest of the project is deliberately
 manufacturer agnostic, so adding another one means writing a single package and
 naming it in one place:
 
@@ -94,9 +99,12 @@ naming it in one place:
 Everything else — claiming the USB interface, PTP framing, tracing, output,
 JSON, the CLI — is already shared and needs no changes.
 
-Cameras from any maker are worth a try before writing any code: the standard
-PTP shutter counter property is tried first on every camera, and plenty of
-bodies still answer it.
+Only cameras from an implemented maker are listed and read. Within those, a
+body missing from the model list is still worth a try before writing any code:
+older Canon bodies answer the standard PTP shutter counter property. Sony
+bodies are the exception: an unlisted one is refused rather than guessed at,
+because each generation keeps its count at a different offset, but a trace from
+one is still exactly what is needed to add it.
 
 ## Other things that would help
 

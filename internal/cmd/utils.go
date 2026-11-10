@@ -15,6 +15,7 @@ import (
 	"github.com/mvisonneau/openshuttercounter/internal/logs"
 	"github.com/mvisonneau/openshuttercounter/pkg/manufacturers"
 	"github.com/mvisonneau/openshuttercounter/pkg/manufacturers/canon"
+	"github.com/mvisonneau/openshuttercounter/pkg/manufacturers/sony"
 	"github.com/mvisonneau/openshuttercounter/pkg/ptp"
 	"github.com/mvisonneau/openshuttercounter/pkg/trace"
 	"github.com/mvisonneau/openshuttercounter/pkg/usb"
@@ -28,6 +29,7 @@ import (
 func registry(logger *zap.Logger, factoryOnly bool) *manufacturers.Registry {
 	return manufacturers.NewRegistry(
 		canon.New(canon.WithLogger(logger), canon.WithFactoryOnly(factoryOnly)),
+		sony.New(sony.WithLogger(logger)),
 	)
 }
 

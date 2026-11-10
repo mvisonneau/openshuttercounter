@@ -18,7 +18,8 @@ func NewApp() *cli.Command {
 
 		Description: `Reads the shutter and mirror actuation counters straight off the camera over
 USB. Cameras that answer the standard PTP counter property are read that way;
-those that do not are read through their manufacturer's own channel.
+those that do not are read through their manufacturer's own channel. Sony
+bodies are read from the newest image on the card, so take one photo first.
 
 Running it with no command reads the connected camera.
 
@@ -26,7 +27,8 @@ If your camera is not recognised, running with --trace produces a file that is
 enough for somebody else to confirm support for it. See CONTRIBUTING.md.
 
 This tool only ever reads. It will not send any command that writes to the
-camera, and refuses to build one; see docs/PROTOCOL.md for why that matters.`,
+camera, and refuses to build one; see docs/PROTOCOL.md for why that matters.
+docs/SONY.md describes how Sony bodies are read.`,
 
 		Flags: append([]cli.Flag{
 			&cli.StringFlag{

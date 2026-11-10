@@ -43,10 +43,11 @@ archives:
       - LICENSE
       - docs/*
       - helpers/*
+      - packaging/udev/*
 
 nfpms:
   - maintainer: &author Maxime VISONNEAU <maxime.visonneau@gmail.com>
-    description: &description Read the shutter actuation count of a Canon EOS camera
+    description: &description Read the shutter actuation count of a Canon EOS or Sony Alpha camera
     license: &license MIT
     homepage: &homepage https://github.com/mvisonneau/openshuttercounter
     vendor: *author
@@ -65,8 +66,8 @@ nfpms:
         dst: /usr/share/zsh/vendor-completions/_{{ .ProjectName }}
         file_info:
           mode: 0644
-      - src: ./helpers/udev/99-canon-ptp.rules
-        dst: /usr/lib/udev/rules.d/99-canon-ptp.rules
+      - src: ./packaging/udev/99-openshuttercounter.rules
+        dst: /usr/lib/udev/rules.d/99-openshuttercounter.rules
         file_info:
           mode: 0644
       - src: ./LICENSE

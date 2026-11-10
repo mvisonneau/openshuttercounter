@@ -48,18 +48,26 @@ in full in [docs/PROTOCOL.md](docs/PROTOCOL.md).
 
 ## Status
 
-Canon is the only manufacturer implemented so far, and exactly one body has
-been confirmed by somebody holding it.
+Canon and Sony are implemented. One Canon body and one Sony body have been
+confirmed by somebody holding them, and two more Sony bodies have been read and
+checked against ExifTool.
 
 | | State |
 |---|---|
 | Canon protocol and framing | Confirmed on an EOS 5D Mark IV, firmware 1.2.1 |
 | Canon MPU address map | Confirmed on the same body, over an exact count of 20 frames |
-| Cameras that answer the standard PTP property | Should work on any make; tried first on every camera |
+| Canon bodies that answer the standard PTP property | Should work; tried first on every Canon camera |
 | Other Canon bodies | Very likely the same channel, but the addresses are unconfirmed |
+| Sony maker note decoding | Read on an Alpha 7 IV (fw 6.02) and an Alpha 7C II (fw 2.0); both match ExifTool on the same file |
+| Sony Alpha 1, 7R V, 7S III, FX3 | Same layout as the Alpha 7 IV according to ExifTool, untried |
+| Sony Alpha 7 III, 7R II/III/IV, 7S II, 7C, 9, 9 II, 6100–6600, 99 II | Count at the same offset as the Alpha 7 IV according to ExifTool, untried |
+| Sony Alpha 7CR, 6700, FX2 | Same layout as the Alpha 7C II according to ExifTool, untried |
+| Sony Alpha 1 II | **Confirmed** on firmware 4.0, over 25 mechanical frames. Count only in mechanical shutter frames |
+| Sony Alpha 7 V | Same rule as the Alpha 1 II according to ExifTool, untried |
+| Other Sony bodies | Refused: the count is elsewhere, uncertain, or absent. See [docs/SONY.md](docs/SONY.md) |
 | Other manufacturers | Not implemented yet |
 | Linux backend (usbfs) | Implemented |
-| macOS backend (libusb via purego) | Implemented, not yet run against a camera |
+| macOS backend (libusb via purego) | Run against a Sony Alpha 7 IV |
 | Windows backend (still image device) | Implemented, not yet run against a camera |
 
 **If your camera is not on the confirmed list, try it anyway.** It costs
@@ -118,13 +126,22 @@ Whatever the platform:
 - A data cable, plugged in directly rather than through a hub.
 - USB 2 ports proved noticeably more reliable than USB 3 during this work.
 
+### Sony Alpha
+
+- Set **USB Connection Mode** to **Image Transfer (MTP)**, or choose it when
+  the camera asks on connect. *Image Transfer (MSC)* makes the card a plain
+  disk with no PTP, and *Remote Shooting* does not offer the card.
+- Take one photo just before reading. Sony bodies record the count in each
+  image, so the reading is the count when the newest image was taken.
+
 ### Linux
 
 The `.deb` and `.rpm` packages install a udev rule that lets you read a camera
-without root. Installing another way, copy it yourself:
+without root, for Canon and Sony cameras. Installing another way, copy it
+from this repository yourself:
 
 ```bash
-sudo cp helpers/udev/99-canon-ptp.rules /etc/udev/rules.d/
+sudo cp packaging/udev/99-openshuttercounter.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
@@ -158,6 +175,9 @@ keeps working. Close anything else that might have the camera open.
 
 **This tool only reads.**
 
+On Sony bodies it sends only standard PTP operations that read the card:
+`GetStorageIDs`, `GetObjectHandles`, `GetObjectInfo` and `GetPartialObject`.
+
 On Canon bodies it sends `MonOpen`, `MonReadAndGetData` and `MonClose`, and
 nothing else. That restraint is not incidental: the same channel carries
 `FA_SetProperty`, `FA_SetCalendar` and `MonWrite`, which write factory state —
@@ -178,9 +198,9 @@ and call primitives, and these bodies also advertise `UpdateFirmware`,
 
 ## How it works
 
-Cameras that still answer the standard PTP shutter counter property are read
-that way, whatever the make. Canon bodies that do not are read over the factory
-command channel:
+Canon cameras that still answer the standard PTP shutter counter property are
+read that way. Canon bodies that do not are read over the factory command
+channel:
 
 ```
 0x9052   send a command   params (0,1) if a reply follows, else (0,0)
@@ -204,6 +224,12 @@ seven years, including to libgphoto2's maintainer.
 Full details, including the reply encoding and the evidence for it, are in
 [docs/PROTOCOL.md](docs/PROTOCOL.md).
 
+Sony bodies have no counter property, and Sony's SDK has no call for one. They
+write the count into every image instead, in an enciphered maker note block
+(EXIF tag `0x9050`). openshuttercounter reads the head of the newest image on
+the card over PTP and decodes it there. The format is in
+[docs/SONY.md](docs/SONY.md).
+
 ## Repository layout
 
 Everything except `pkg/manufacturers/<name>` is manufacturer agnostic, so
@@ -215,11 +241,12 @@ rest.
 | `cmd/`, `internal/` | The CLI |
 | `pkg/manufacturers` | What a camera maker has to provide to be readable |
 | `pkg/manufacturers/canon` | Canon's factory channel, counter decoding and model list |
+| `pkg/manufacturers/sony` | Sony's maker note decoding and model list |
 | `pkg/ptp` | PTP over USB, enough of it to send vendor opcodes |
 | `pkg/usb` | The three USB backends and the descriptor parsing they share |
 | `pkg/trace` | Recording and reading back a conversation with a camera |
 | `pkg/pcap` | Reading USB captures, for traces that came from elsewhere |
-| `docs/` | The protocol reference |
+| `docs/` | The protocol references |
 
 ## Credit
 
