@@ -63,6 +63,18 @@ var models = []Model{
 			{Label: "Total counter", Address: 0x1015, Length: 10},
 		},
 	},
+	{
+		Name:        "EOS 6D Mark II",
+		ProductID:   0x32ca,
+		RatedLife:   150000,
+		Confirmed:   true,
+		ConfirmedOn: "firmware 1.1.1",
+		Counters: []Counter{
+			{Label: "Shutter actuations", Address: 0x1001, Length: 10},
+			{Label: "Mirror actuations", Address: 0x100b, Length: 10},
+			{Label: "Total counter", Address: 0x1015, Length: 10},
+		},
+	},
 }
 
 // Models returns every body with a known address map.
